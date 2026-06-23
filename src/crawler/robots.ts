@@ -1,5 +1,7 @@
-import robotsParser from "robots-parser";
+import _robotsParser from "robots-parser";
 import { config } from "../config.js";
+
+const robotsParser = _robotsParser as any;
 
 export async function loadRobots(siteUrl: string) {
   const { origin } = new URL(siteUrl);
@@ -12,7 +14,7 @@ export async function loadRobots(siteUrl: string) {
     const body = res.ok ? await res.text() : "";
     return robotsParser(robotsUrl, body);
   } catch {
-    // No robots.txt (or it failed to load) → treat as allow-all, but we still rate-limit.
+    // No robots.txt (or it failed to load) — treat as allow-all, but we still rate-limit.
     return robotsParser(robotsUrl, "");
   }
 }

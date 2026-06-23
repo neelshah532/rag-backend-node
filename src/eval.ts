@@ -1,4 +1,4 @@
-import { startIndexing, getJob } from "./jobs.js";
+import { runIndexing } from "./jobs.js";
 import { retrieve } from "./rag/retrieve.js";
 import { config } from "./config.js";
 
@@ -12,11 +12,9 @@ const CASES: { q: string; expect: string }[] = [
 
 async function main() {
   console.warn(`Indexing ${SITE} …`);
-  await startIndexing(SITE);
-  while (getJob().status !== "ready" && getJob().status !== "error") {
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  if (getJob().status === "error") throw new Error(getJob().error);
+  await runIndexing(SITE, (state) => {
+    if (state.status === "error") throw new Error(state.error);
+  });
 
   let hits = 0;
   for (const c of CASES) {

@@ -8,6 +8,7 @@ export const config = {
   // crawl scope + politeness
   maxPages: Number(process.env.MAX_PAGES ?? 40),
   maxDepth: Number(process.env.MAX_DEPTH ?? 3),
+  maxLinksPerPage: Number(process.env.MAX_LINKS_PER_PAGE ?? 25),
   crawlConcurrency: Number(process.env.CRAWL_CONCURRENCY ?? 2),
   politenessDelayMs: Number(process.env.POLITENESS_DELAY_MS ?? 500),
   requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS ?? 15000),
