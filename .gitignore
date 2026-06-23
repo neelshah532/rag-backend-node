@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+.vscode/
+.husky/
+*.log
+package-lock.json

@@ -1,0 +1,23 @@
+import "dotenv/config";
+
+export const config = {
+  port: Number(process.env.PORT ?? 8787),
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  genModel: process.env.GEN_MODEL ?? "gemini-2.5-flash",
+
+  // crawl scope + politeness
+  maxPages: Number(process.env.MAX_PAGES ?? 40),
+  maxDepth: Number(process.env.MAX_DEPTH ?? 3),
+  crawlConcurrency: Number(process.env.CRAWL_CONCURRENCY ?? 2),
+  politenessDelayMs: Number(process.env.POLITENESS_DELAY_MS ?? 500),
+  requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS ?? 15000),
+  userAgent: process.env.USER_AGENT ?? "ChatWithSiteBot/1.0",
+
+  // chunking
+  chunkWords: Number(process.env.CHUNK_WORDS ?? 220),
+  chunkOverlapWords: Number(process.env.CHUNK_OVERLAP_WORDS ?? 40),
+
+  // retrieval / grounding
+  topK: Number(process.env.TOP_K ?? 5),
+  minScore: Number(process.env.MIN_SCORE ?? 0.25),
+};
