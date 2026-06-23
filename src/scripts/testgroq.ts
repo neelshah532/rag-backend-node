@@ -1,4 +1,4 @@
-import Groq from "groq-sdk";
+import { Groq } from "groq-sdk";
 import { config } from "../config.js";
 import dotenv from "dotenv";
 dotenv.config();
