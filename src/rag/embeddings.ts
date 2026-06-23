@@ -3,7 +3,7 @@ import { pipeline, type FeatureExtractionPipeline } from "@huggingface/transform
 let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
 
 // Load the pipeline once
-const _pipeline = pipeline as any;
+const _pipeline = (pipeline as unknown) as any;
 const getExtractor = async () => {
   if (!extractorPromise) {
     extractorPromise = _pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
