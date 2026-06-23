@@ -1,6 +1,6 @@
 import { crawlSite } from "./crawler/crawl.js";
 import { chunkPage } from "./rag/chunk.js";
-import { embed } from "./rag/embeddings.js";
+import { embed, initEmbeddings } from "./rag/embeddings.js";
 import { store } from "./rag/store.js";
 
 type Status = "idle" | "crawling" | "indexing" | "ready" | "error";
@@ -33,6 +33,7 @@ export async function runIndexing(siteUrl: string, onProgress: (s: JobState) => 
 
   job.status = "indexing"; job.message = `Embedding ${docs.length} pages…`; emit();
   const raw = docs.flatMap(chunkPage);
+  initEmbeddings(raw.map((c) => c.text));
   const BATCH = 32; let id = 0;
   for (let i = 0; i < raw.length; i += BATCH) {
     const batch = raw.slice(i, i + BATCH);

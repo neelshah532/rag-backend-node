@@ -4,11 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "start": "tsx src/server.ts",
-    "eval": "tsx src/eval.ts"
+    "start": "tsx src/server.ts"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.8.1",
     "cheerio": "^1.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
