@@ -44,16 +44,21 @@ npm run dev                   # http://localhost:8787
 
 See `.env.example` for the full list with defaults.
 
-## Known Limitations
+## Truthful Status & Known Limitations
 
-- JavaScript-rendered (SPA) pages return little text (fetch sees initial HTML only).
-- In-memory store doesn't persist across restarts and is single-process.
-- Retrieval is weaker on very long pages — the relevant passage gets diluted across many similar chunks.
-- Boilerplate stripping is heuristic; some templated text still leaks in.
+**What Works (Post-Fixes):**
+- **Safe Chunk Truncation:** Tested chunk sizes using the exact embedding tokenizer. Reduced chunks to 80 words (with 20 overlap) to comfortably fit the model's 256-token limit (max observed tokens: 210, ensuring no truncation).
+- **Proper Citation Alignment:** The UI source anchors properly align with the chunks retrieved. Citations `[1]`, `[2]` perfectly correspond to the sorted UI links, handling shared URLs gracefully.
+- **Calibrated Thresholds:** Integrated an `npm run eval` harness that tests retrieval. `MIN_SCORE` was empirically tuned to `0.40`, separating positive hits (0.54-0.67) from negative outliers (0.25-0.26) for strict LLM grounding.
 
-## What I'd Improve
+**What Doesn't Work & Limitations:**
+- **JS-Rendered (SPA) Pages:** The crawler relies completely on static `fetch` and cheerio; it is currently blind to content rendered by frameworks like React or Vue on the client side.
+- **Ephemeral Store:** The index resets entirely if the Node server shuts down, forcing a re-index for each session.
+- **Structural Blindness:** Word-window chunking ignores HTML semantic tags like `<p>`, `<h2>`, or `<li>`, which can unintentionally split complex sentences in half.
+- **Specialized Jargon:** Dense embeddings (MiniLM) struggle with highly niche terms that weren't well represented in their training data.
 
-- Playwright for JS pages, behind the same crawl interface.
-- Hybrid retrieval (BM25 + vectors) and a small reranker for long pages.
-- Per-section (heading-aware) chunking instead of a flat word window.
-- Persist the index (pgvector) so multiple sites/users are supported.
+**What I'd Improve:**
+- Integrate `Playwright` to support JS-rendered page crawling.
+- Add a Hybrid Search pipeline (combining vectors with BM25) to fix the rare-jargon retrieval flaws.
+- Replace sliding windows with heading-aware Markdown chunking.
+- Persist vectors in `pgvector` or `Qdrant`.

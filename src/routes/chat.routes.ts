@@ -26,15 +26,15 @@ chatRouter.post("/chat", async (req, res) => {
 
     // GROUNDING: refuse before spending an LLM call if nothing is relevant.
     if (!grounded) {
-      send("token", { text: "I couldn't find that on this site." });
+      send("token", { text: "I couldn't find that on this site. Please ask questions related to the company site." });
       send("done", { sources: [] });
       return res.end();
     }
 
     const sources = dedupeSources(hits);
-    send("sources", { sources }); // send citations up front so the UI can show them immediately
+    send("sources", { sources });
 
-    const prompt = buildPrompt(question, hits);
+    const prompt = buildPrompt(question, hits, sources);
     for await (const token of generateAnswerStream(prompt)) {
       send("token", { text: token });
     }
@@ -43,11 +43,20 @@ chatRouter.post("/chat", async (req, res) => {
     res.end();
   } catch (err) {
     let errorMessage = (err as Error).message;
-    
-    // The Gemini SDK sometimes throws a stringified JSON containing the raw 503 error.
-    // If we detect this, format it nicely so it doesn't break the frontend UI.
-    if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
-      errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+    if (errorMessage.startsWith("{") || errorMessage.includes('\"error\"')) {
+      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+        errorMessage = "The AI model's free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.";
+      } else if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
+        errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+      } else {
+        errorMessage = "An unexpected API error occurred while contacting the AI model. Please try again.";
+      }
+    } else {
+      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
+        errorMessage = "The AI model's free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.";
+      } else if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
+        errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+      }
     }
 
     send("error", { message: errorMessage });

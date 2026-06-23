@@ -7,8 +7,6 @@ export async function retrieve(query: string) {
 
   const qv = await embedOne(query);
   const hits = store.search(qv, config.topK);
-
-  // GROUNDING GATE: if even the best chunk is weakly related, treat as "not covered".
   const grounded = hits.length > 0 && hits[0].score >= config.minScore;
   return { hits, grounded };
 }

@@ -16,8 +16,6 @@ class VectorStore {
   get size() {
     return this.chunks.length;
   }
-
-  /** Cosine similarity == dot product because vectors are pre-normalized. */
   search(queryVec: number[], k: number): (Chunk & { score: number })[] {
     return this.chunks
       .map((c) => ({ ...c, score: dot(queryVec, c.embedding) }))
@@ -31,6 +29,4 @@ function dot(a: number[], b: number[]): number {
   for (let i = 0; i < a.length; i++) s += a[i] * b[i];
   return s;
 }
-
-// Module singleton — one store for the running process.
 export const store = new VectorStore();

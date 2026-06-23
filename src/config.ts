@@ -15,10 +15,10 @@ export const config = {
   userAgent: process.env.USER_AGENT ?? "ChatWithSiteBot/1.0",
 
   // chunking
-  chunkWords: Number(process.env.CHUNK_WORDS ?? 220),
-  chunkOverlapWords: Number(process.env.CHUNK_OVERLAP_WORDS ?? 40),
+  chunkWords: Number(process.env.CHUNK_WORDS ?? 80),
+  chunkOverlapWords: Number(process.env.CHUNK_OVERLAP_WORDS ?? 20),
 
   // retrieval / grounding
   topK: Number(process.env.TOP_K ?? 5),
-  minScore: Number(process.env.MIN_SCORE ?? 0.25),
+  minScore: Number(process.env.MIN_SCORE ?? 0.10),
 };

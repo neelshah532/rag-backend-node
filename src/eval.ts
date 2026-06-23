@@ -3,11 +3,12 @@ import { retrieve } from "./rag/retrieve.js";
 import { config } from "./config.js";
 
 // Edit these for the site you're testing.
-const SITE = process.env.EVAL_SITE ?? "https://example.com";
+const SITE = process.env.EVAL_SITE ?? "https://posimyth.com/";
 const CASES: { q: string; expect: string }[] = [
-  { q: "What is this site about?", expect: "example.com" },
-  // { q: "How do I contact them?", expect: "/contact" },
-  // { q: "What are the pricing tiers?", expect: "/pricing" },
+  { q: "What is NexterWP?", expect: "nexter" },
+  { q: "Tell me about The Plus Addons for Elementor", expect: "plus-addons" },
+  { q: "How do I bake a chocolate cake?", expect: "cake" }, // Off-topic
+  { q: "Who won the superbowl in 2012?", expect: "superbowl" }, // Off-topic
 ];
 
 async function main() {
