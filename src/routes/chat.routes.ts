@@ -42,7 +42,15 @@ chatRouter.post("/chat", async (req, res) => {
     send("done", { sources });
     res.end();
   } catch (err) {
-    send("error", { message: (err as Error).message });
+    let errorMessage = (err as Error).message;
+    
+    // The Gemini SDK sometimes throws a stringified JSON containing the raw 503 error.
+    // If we detect this, format it nicely so it doesn't break the frontend UI.
+    if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
+      errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+    }
+
+    send("error", { message: errorMessage });
     res.end();
   }
 });
