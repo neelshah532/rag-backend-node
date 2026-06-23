@@ -1,8 +1,8 @@
-import { config } from "../config.js";
-import { loadRobots } from "./robots.js";
-import { extractPage } from "./extract.js";
-import { normalizeUrl, sameHost, looksLikeAsset } from "./urls.js";
-import type { PageDoc } from "../types.js";
+import { config } from '../config.js';
+import { loadRobots } from './robots.js';
+import { extractPage } from './extract.js';
+import { normalizeUrl, sameHost, looksLikeAsset } from './urls.js';
+import type { PageDoc } from '../types.js';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -13,7 +13,7 @@ export interface CrawlEvents {
 
 export async function crawlSite(startUrl: string, events: CrawlEvents = {}): Promise<PageDoc[]> {
   const rawStart = normalizeUrl(startUrl);
-  if (!rawStart) throw new Error("Invalid start URL");
+  if (!rawStart) throw new Error('Invalid start URL');
   const start: string = rawStart;
 
   const robots = await loadRobots(start);
@@ -38,11 +38,11 @@ export async function crawlSite(startUrl: string, events: CrawlEvents = {}): Pro
     await politeGate();
 
     const res = await fetch(item.url, {
-      headers: { "user-agent": config.userAgent, accept: "text/html" },
+      headers: { 'user-agent': config.userAgent, accept: 'text/html' },
       signal: AbortSignal.timeout(config.requestTimeoutMs),
     });
-    const ctype = res.headers.get("content-type") ?? "";
-    if (!res.ok || !ctype.includes("text/html")) return;
+    const ctype = res.headers.get('content-type') ?? '';
+    if (!res.ok || !ctype.includes('text/html')) return;
 
     const html = await res.text();
     const { doc, links } = extractPage(item.url, html);

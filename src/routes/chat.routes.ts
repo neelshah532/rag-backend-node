@@ -1,74 +1,82 @@
-import { Router } from "express";
-import { retrieve } from "../rag/retrieve.js";
-import { buildPrompt } from "../rag/prompt.js";
-import { generateAnswerStream } from "../rag/generate.js";
-import type { Source } from "../types.js";
+import { Router } from 'express';
+import { retrieve } from '../rag/retrieve.js';
+import { buildPrompt } from '../rag/prompt.js';
+import { generateAnswerStream } from '../rag/generate.js';
+import type { Source } from '../types.js';
 
 export const chatRouter = Router();
 
-chatRouter.post("/chat", async (req, res) => {
+chatRouter.post('/chat', async (req, res) => {
   const { question } = req.body ?? {};
-  if (!question || typeof question !== "string") {
-    return res.status(400).json({ error: "Provide a 'question' string." });
+  if (!question || typeof question !== 'string') {
+    return res.status(400).json({ error: 'Provide a \'question\' string.' });
   }
 
   // SSE setup
-  res.setHeader("Content-Type", "text/event-stream");
-  res.setHeader("Cache-Control", "no-cache");
-  res.setHeader("Connection", "keep-alive");
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
   res.flushHeaders?.();
 
   const send = (event: string, data: unknown) =>
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 
   try {
+    const cleanQuestion = question.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '');
+    const greetings = ['hi', 'hello', 'hey', 'hola', 'greetings', 'good morning', 'good afternoon', 'good evening', 'yo', 'sup', 'howdy'];
+    if (greetings.includes(cleanQuestion)) {
+      send('token', { text: 'Hello! How can I help you learn about the website today? Feel free to ask any questions.' });
+      send('done', { sources: [] });
+      return res.end();
+    }
+
     const { hits, grounded } = await retrieve(question);
 
     // GROUNDING: refuse before spending an LLM call if nothing is relevant.
     if (!grounded) {
-      send("token", { text: "I couldn't find that on this site. Please ask questions related to the company site." });
-      send("done", { sources: [] });
+      send('token', { text: 'I couldn\'t find that on this site. Please ask questions related to the company site.' });
+      send('done', { sources: [] });
       return res.end();
     }
 
     const sources = dedupeSources(hits);
-    send("sources", { sources });
+    send('sources', { sources });
 
     const prompt = buildPrompt(question, hits, sources);
     for await (const token of generateAnswerStream(prompt)) {
-      send("token", { text: token });
+      send('token', { text: token });
     }
 
-    send("done", { sources });
+    send('done', { sources });
     res.end();
   } catch (err) {
     let errorMessage = (err as Error).message;
-    if (errorMessage.startsWith("{") || errorMessage.includes('\"error\"')) {
-      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
-        errorMessage = "The AI model's free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.";
-      } else if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
-        errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+    if (errorMessage.startsWith('{') || errorMessage.includes('"error"')) {
+      if (errorMessage.includes('429') || errorMessage.includes('quota')) {
+        errorMessage = 'The AI model\'s free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.';
+      } else if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
+        errorMessage = 'The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.';
       } else {
-        errorMessage = "An unexpected API error occurred while contacting the AI model. Please try again.";
+        errorMessage = 'An unexpected API error occurred while contacting the AI model. Please try again.';
       }
     } else {
-      if (errorMessage.includes("429") || errorMessage.includes("quota")) {
-        errorMessage = "The AI model's free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.";
-      } else if (errorMessage.includes("503") || errorMessage.includes("high demand")) {
-        errorMessage = "The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.";
+      if (errorMessage.includes('429') || errorMessage.includes('quota')) {
+        errorMessage = 'The AI model\'s free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.';
+      } else if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
+        errorMessage = 'The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.';
       }
     }
 
-    send("error", { message: errorMessage });
+    send('error', { message: errorMessage });
     res.end();
   }
 });
 
-function dedupeSources(hits: { url: string; title: string; score: number }[]): Source[] {
+const dedupeSources = (hits: { url: string; title: string; score: number }[]): Source[] => {
   const best = new Map<string, Source>();
   for (const h of hits) {
     const cur = best.get(h.url);
     if (!cur || h.score > cur.score) best.set(h.url, { url: h.url, title: h.title, score: h.score });
   }
   return [...best.values()];
-}
+};

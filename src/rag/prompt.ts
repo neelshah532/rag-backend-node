@@ -1,11 +1,11 @@
-import type { Chunk, Source } from "../types.js";
+import type { Chunk, Source } from '../types.js';
 
 export function buildPrompt(question: string, hits: (Chunk & { score: number })[], sources: Source[]): string {
   const urlToId = new Map(sources.map((s, i) => [s.url, i + 1]));
 
   const context = hits
     .map((h) => `[${urlToId.get(h.url)}] (source: ${h.url})\n${h.text}`)
-    .join("\n\n---\n\n");
+    .join('\n\n---\n\n');
 
   return `You are a helpful assistant answering questions ONLY using the provided context from a single website. The user may make any type of mistake—such as severe spelling errors, poor grammar, incomplete sentences, or ambiguous shorthand. You must intuitively infer their intended meaning, ignore all mistakes, and answer politely in clear, correct English.
 

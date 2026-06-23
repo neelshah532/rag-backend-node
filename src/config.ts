@@ -1,9 +1,14 @@
-import "dotenv/config";
+import 'dotenv/config';
 
 export const config = {
   port: Number(process.env.PORT ?? 8787),
-  groqApiKey: process.env.GROQ_API_KEY ?? "",
-  genModel: process.env.GEN_MODEL ?? "llama-3.1-8b-instant",
+  groqApiKey: process.env.GROQ_API_KEY ?? '',
+  genModel: process.env.GEN_MODEL ?? 'llama-3.1-8b-instant',
+  chromaUrl: process.env.CHROMA_URL ?? 'http://localhost:8000',
+  chromaToken: process.env.CHROMA_TOKEN ?? '',
+  chromaApiKey: process.env.CHROMA_API_KEY ?? '',
+  chromaTenant: process.env.CHROMA_TENANT ?? '',
+  chromaDatabase: process.env.CHROMA_DATABASE ?? '',
 
   // crawl scope + politeness
   maxPages: Number(process.env.MAX_PAGES ?? 40),
@@ -12,7 +17,7 @@ export const config = {
   crawlConcurrency: Number(process.env.CRAWL_CONCURRENCY ?? 2),
   politenessDelayMs: Number(process.env.POLITENESS_DELAY_MS ?? 500),
   requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS ?? 15000),
-  userAgent: process.env.USER_AGENT ?? "ChatWithSiteBot/1.0",
+  userAgent: process.env.USER_AGENT ?? 'ChatWithSiteBot/1.0',
 
   // chunking
   chunkWords: Number(process.env.CHUNK_WORDS ?? 80),
