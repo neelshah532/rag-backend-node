@@ -1,23 +1,26 @@
-import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 import { config } from "../config.js";
 
-const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
+const groq = new Groq({ apiKey: config.groqApiKey });
 
 export async function generateAnswer(prompt: string): Promise<string> {
-  const res = await ai.models.generateContent({
+  const res = await groq.chat.completions.create({
     model: config.genModel,
-    contents: prompt,
+    messages: [{ role: "user", content: prompt }],
   });
-  return res.text ?? "";
+  return res.choices[0]?.message?.content ?? "";
 }
 
 /** Streaming version — yields text tokens as they arrive (Stretch Goal). */
 export async function* generateAnswerStream(prompt: string): AsyncGenerator<string> {
-  const stream = await ai.models.generateContentStream({
+  const stream = await groq.chat.completions.create({
     model: config.genModel,
-    contents: prompt,
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
   });
+  
   for await (const chunk of stream) {
-    if (chunk.text) yield chunk.text;
+    const content = chunk.choices[0]?.delta?.content;
+    if (content) yield content;
   }
 }

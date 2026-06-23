@@ -2,8 +2,8 @@ import "dotenv/config";
 
 export const config = {
   port: Number(process.env.PORT ?? 8787),
-  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-  genModel: process.env.GEN_MODEL ?? "gemini-2.5-flash",
+  groqApiKey: process.env.GROQ_API_KEY ?? "",
+  genModel: process.env.GEN_MODEL ?? "llama-3.1-8b-instant",
 
   // crawl scope + politeness
   maxPages: Number(process.env.MAX_PAGES ?? 40),
