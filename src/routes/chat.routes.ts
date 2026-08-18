@@ -22,9 +22,8 @@ chatRouter.post('/chat', async (req, res) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 
   try {
-    const cleanQuestion = question.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, '');
     const greetings = ['hi', 'hello', 'hey', 'hola', 'greetings', 'good morning', 'good afternoon', 'good evening', 'yo', 'sup', 'howdy'];
-    if (greetings.includes(cleanQuestion)) {
+    if (greetings.includes(question.trim().toLowerCase())) {
       send('token', { text: 'Hello! How can I help you learn about the website today? Feel free to ask any questions.' });
       send('done', { sources: [] });
       return res.end();

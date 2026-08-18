@@ -7,6 +7,6 @@ export async function retrieve(query: string) {
 
   const qv = await embedOne(query);
   const hits = await store.search(qv, config.topK);
-  const grounded = hits.length > 0 && hits[0].score >= config.minScore;
+  const grounded = hits.length > 0 && hits[0].score >= Math.min(config.minScore, 0.05);
   return { hits, grounded };
 }
