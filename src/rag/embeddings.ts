@@ -1,9 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { config } from '../config.js';
 
-const EMBEDDING_MODEL = 'gemini-embedding-2';
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? 'text-embedding-004';
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY ?? '');
-const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+function getModel() {
+  const apiKey = config.googleApiKey || process.env.GOOGLE_API_KEY || '';
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
+}
 
 const MAX_RETRIES = 5;
 
@@ -36,7 +40,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
   if (texts.length === 0) return [];
 
   return withRetry(async () => {
-    const batchResult = await model.batchEmbedContents({
+    const batchResult = await getModel().batchEmbedContents({
       requests: texts.map((text) => ({
         content: { role: 'user', parts: [{ text }] },
       })),
@@ -47,7 +51,7 @@ export async function embed(texts: string[]): Promise<number[][]> {
 
 export async function embedOne(text: string): Promise<number[]> {
   return withRetry(async () => {
-    const result = await model.embedContent(text);
+    const result = await getModel().embedContent(text);
     return result.embedding.values;
   });
 }

@@ -50,21 +50,25 @@ chatRouter.post('/chat', async (req, res) => {
     send('done', { sources });
     res.end();
   } catch (err) {
-    let errorMessage = (err as Error).message;
-    if (errorMessage.startsWith('{') || errorMessage.includes('"error"')) {
-      if (errorMessage.includes('429') || errorMessage.includes('quota')) {
-        errorMessage = 'The AI model\'s free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.';
-      } else if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
-        errorMessage = 'The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.';
-      } else {
-        errorMessage = 'An unexpected API error occurred while contacting the AI model. Please try again.';
-      }
-    } else {
-      if (errorMessage.includes('429') || errorMessage.includes('quota')) {
-        errorMessage = 'The AI model\'s free-tier usage quota has been exceeded for this API key. Please try again later or use a different key.';
-      } else if (errorMessage.includes('503') || errorMessage.includes('high demand')) {
-        errorMessage = 'The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.';
-      }
+    console.error('[Chat Route Error]:', err);
+    let errorMessage = (err as Error).message ?? 'Unknown error';
+
+    if (
+      errorMessage.includes('401') ||
+      errorMessage.includes('expired_api_key') ||
+      errorMessage.includes('Invalid API Key') ||
+      errorMessage.includes('unregistered callers') ||
+      errorMessage.includes('403')
+    ) {
+      errorMessage = 'The AI model API key (GROQ_API_KEY or GOOGLE_API_KEY) is invalid or expired. Please update the API key in your production environment variables.';
+    } else if (errorMessage.includes('429') || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
+      errorMessage = 'The AI model\'s usage quota has been exceeded for this API key. Please try again later or update the API key.';
+    } else if (errorMessage.includes('503') || errorMessage.includes('high demand') || errorMessage.includes('UNAVAILABLE')) {
+      errorMessage = 'The AI model is currently experiencing high demand (Service Unavailable). Please wait a moment and try again.';
+    } else if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+      errorMessage = 'The specified AI model or resource was not found. Please check your model configuration.';
+    } else if (errorMessage.startsWith('{') || errorMessage.includes('"error"')) {
+      errorMessage = 'An unexpected API error occurred while contacting the AI model. Please check server logs for details.';
     }
 
     send('error', { message: errorMessage });

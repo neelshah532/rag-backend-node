@@ -17,6 +17,7 @@ indexRouter.post('/index', async (req, res) => {
     await runIndexing(url, (state) => send('progress', state));
     send('done', { ok: true });
   } catch (e) {
+    console.error('[Index Route Error]:', e);
     send('error', { message: (e as Error).message });
   } finally {
     res.end();

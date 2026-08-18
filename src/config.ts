@@ -3,6 +3,7 @@ import 'dotenv/config';
 export const config = {
   port: Number(process.env.PORT ?? 8787),
   groqApiKey: process.env.GROQ_API_KEY ?? '',
+  googleApiKey: process.env.GOOGLE_API_KEY ?? '',
   genModel: process.env.GEN_MODEL ?? 'llama-3.1-8b-instant',
   chromaUrl: process.env.CHROMA_URL ?? 'http://localhost:8000',
   chromaToken: process.env.CHROMA_TOKEN ?? '',
